@@ -150,7 +150,7 @@ body {
   }
 }
 
-.load-more {
+/* .load-more {
   display: none;
   margin: 20px auto;
   padding: 10px 20px;
@@ -165,4 +165,23 @@ body {
 
 .load-more:hover {
   background-color: #0056b3;
+} */
+
+.load-more-container {
+  text-align: center;
+  margin: 20px 0 40px;
+}
+
+.load-more {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #5a67d8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.load-more:hover {
+  background-color: #434190;
 }

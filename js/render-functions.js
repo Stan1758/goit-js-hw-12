@@ -62,10 +62,3 @@ export function hideLoader() {
 }
 
 
-export function showLoadMoreButton() {
-  document.querySelector('.load-more').style.display = 'block';
-}
-
-export function hideLoadMoreButton() {
-  document.querySelector('.load-more').style.display = 'none';
-}
