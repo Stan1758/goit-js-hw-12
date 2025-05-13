@@ -10,7 +10,9 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
+const input = form.elements['search-text'];
 const loadMoreBtn = document.querySelector('#load-more-btn');
+const loadMoreLoader = document.querySelector('.load-more-loader');
 
 let totalHits = 0;
 let loadedImages = 0;
@@ -18,7 +20,6 @@ let loadedImages = 0;
 form.addEventListener('submit', async event => {
   event.preventDefault();
 
-  const input = form.elements['search-text'];
   const query = input.value.trim();
 
   if (!query) {
@@ -49,9 +50,15 @@ form.addEventListener('submit', async event => {
     }
 
     createGallery(data.hits);
+    input.value = '';
 
     if (loadedImages < totalHits) {
       loadMoreBtn.hidden = false;
+    } else {
+      iziToast.info({
+        message: 'You have reached the end of the gallery.',
+        position: 'topRight',
+      });
     }
   } catch (error) {
     iziToast.error({
@@ -65,27 +72,48 @@ form.addEventListener('submit', async event => {
 });
 
 loadMoreBtn.addEventListener('click', async () => {
-  showLoader();
+  loadMoreBtn.disabled = true; 
+  loadMoreLoader.style.display = 'inline-block';
 
   try {
     const data = await getMoreImages();
-    createGallery(data.hits);
-    loadedImages += data.hits.length;
 
+    if (data.hits && data.hits.length) {
+      createGallery(data.hits);
+      loadedImages += data.hits.length;
+    }
+
+    
     if (loadedImages >= totalHits) {
-      loadMoreBtn.hidden = true;
+      loadMoreBtn.style.display = 'none';
       iziToast.info({
-        message: "We're sorry, but you've reached the end of search results.",
+        title: 'End of Gallery',
+        message: 'You have reached the end of the gallery.',
         position: 'topRight',
       });
     }
+
+    
+    smoothScrollToNextGroup();
   } catch (error) {
     iziToast.error({
       title: 'Error',
-      message: 'Failed to load more images.',
+      message: 'Something went wrong, please try again.',
       position: 'topRight',
     });
   } finally {
-    hideLoader();
+    loadMoreLoader.style.display = 'none'; 
+    loadMoreBtn.disabled = false; 
   }
 });
+
+function smoothScrollToNextGroup() {
+  const firstImageCard = document.querySelector('.gallery-item');
+  if (firstImageCard) {
+    const cardHeight = firstImageCard.getBoundingClientRect().height;
+    window.scrollBy({
+      top: 2 * cardHeight,
+      behavior: 'smooth', 
+    });
+  }
+}
