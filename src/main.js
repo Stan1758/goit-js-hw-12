@@ -1,4 +1,4 @@
-import { getImagesByQuery } from './js/pixabay-api.js';
+import { getImagesByQuery, getMoreImages, setQuery } from './js/pixabay-api.js';
 import {
   createGallery,
   clearGallery,
@@ -10,8 +10,12 @@ import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 
 const form = document.querySelector('.form');
+const loadMoreBtn = document.querySelector('#load-more-btn');
 
-form.addEventListener('submit', event => {
+let totalHits = 0;
+let loadedImages = 0;
+
+form.addEventListener('submit', async event => {
   event.preventDefault();
 
   const input = form.elements['search-text'];
@@ -28,28 +32,60 @@ form.addEventListener('submit', event => {
 
   clearGallery();
   showLoader();
+  loadMoreBtn.hidden = true;
+  setQuery(query);
 
-  getImagesByQuery(query)
-    .then(data => {
-      if (!data.hits || !data.hits.length) {
-        iziToast.info({
-          title: '',
-          message: 'Sorry, there are no images matching your search query. Please try again!',
-          position: 'topRight',
-        });
-        return;
-      }
+  try {
+    const data = await getImagesByQuery(query);
+    totalHits = data.totalHits;
+    loadedImages = data.hits.length;
 
-      createGallery(data.hits);
-    })
-    .catch(error => {
-      iziToast.error({
-        title: 'Error',
-        message: 'Something went wrong, please try again.',
+    if (!data.hits.length) {
+      iziToast.info({
+        message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       });
-    })
-    .finally(() => {
-      hideLoader();
+      return;
+    }
+
+    createGallery(data.hits);
+
+    if (loadedImages < totalHits) {
+      loadMoreBtn.hidden = false;
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Something went wrong, please try again.',
+      position: 'topRight',
     });
+  } finally {
+    hideLoader();
+  }
+});
+
+loadMoreBtn.addEventListener('click', async () => {
+  showLoader();
+
+  try {
+    const data = await getMoreImages();
+    createGallery(data.hits);
+    loadedImages += data.hits.length;
+
+    if (loadedImages >= totalHits) {
+      loadMoreBtn.hidden = true;
+      iziToast.info({
+        message: "We're sorry, but you've reached the end of search results.",
+        position: 'topRight',
+      });
+    }
+  } catch (error) {
+    iziToast.error({
+      title: 'Error',
+      message: 'Failed to load more images.',
+      position: 'topRight',
+    });
+  } finally {
+    hideLoader();
+  }
 });
