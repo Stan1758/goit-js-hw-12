@@ -156,6 +156,7 @@ body {
 }
 
 #load-more-btn {
+  display: none;
   padding: 10px 24px;
   font-size: 16px;
   border: none;
@@ -164,6 +165,7 @@ body {
   color: white;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin: auto;
 }
 
 #load-more-btn:hover {

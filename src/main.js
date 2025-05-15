@@ -19,6 +19,8 @@ let loadedImages = 0;
 
 form.addEventListener('submit', async event => {
   event.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
 
   const query = input.value.trim();
 
@@ -33,7 +35,7 @@ form.addEventListener('submit', async event => {
 
   clearGallery();
   showLoader();
-  loadMoreBtn.hidden = true;
+  loadMoreBtn.style.display = 'none';
   setQuery(query);
 
   try {
@@ -53,7 +55,7 @@ form.addEventListener('submit', async event => {
     input.value = '';
 
     if (loadedImages < totalHits) {
-      loadMoreBtn.hidden = false;
+      loadMoreBtn.style.display = 'block';
     } else {
       iziToast.info({
         message: 'You have reached the end of the gallery.',
